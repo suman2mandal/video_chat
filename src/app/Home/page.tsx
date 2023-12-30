@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useSocket} from "@/provider/socket";
 
 function Page() {
@@ -7,12 +7,23 @@ function Page() {
     const [emailID, setEmailID] = React.useState("");
     const [roomID, setRoomID] = React.useState("");
 
-    const joinRoom= () => {
+    const joinRoom = () => {
         if (socketContext) {
             const {socket} = socketContext;
-            socket.emit("join-room", {roomID, userID:emailID});
+            socket.emit("join-room", {roomID, userID: emailID});
         }
     }
+
+    useEffect(() => {
+        if (socketContext) {
+            const {socket} = socketContext;
+            const handleRoomJoin = ({roomID}:{roomID:string}) => {
+                console.log("Room Joined", roomID);
+            }
+            socket.on("joined-room", handleRoomJoin);
+        }
+    }, [socketContext]);
+
     return (
         <div className="flex justify-center items-center h-screen">
             <div className="flex flex-col space-y-6 text-slate-700">
