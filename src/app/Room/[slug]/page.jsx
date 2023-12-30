@@ -8,7 +8,7 @@ function Page() {
     const { socket } = socketContext||{};
     const { peer, createOffer } = usePeer();
 
-    const handleNewUserJoined = useCallback(async (data: any) => {
+    const handleNewUserJoined = useCallback(async (data) => {
         const { userID } = data;
         console.log("New user joined", userID);
 
@@ -18,22 +18,18 @@ function Page() {
         }
     }, [createOffer, socket]);
 
-    const handleIncomingCall = useCallback(async (data: any) => {
+    const handleIncomingCall = useCallback(async (data) => {
         const { from, offer } = data;
         console.log("Incoming call", from, offer);
+        // console.log("calling");
     }, []);
 
     useEffect(() => {
-        if(socket){
-            socket.on('user-joined', handleNewUserJoined);
-            socket.on('incoming-call', handleIncomingCall);
-        }
-
+        socket.on('user-joined', handleNewUserJoined);
+        socket.on('incoming-call', handleIncomingCall);
         return () => {
-            if(socket){
-                socket.off('user-joined',handleNewUserJoined);
-                socket.off('incoming-call',handleIncomingCall);
-            }
+            socket.off('user-joined',handleNewUserJoined);
+            socket.off('incoming-call',handleIncomingCall);
         }
     }, [socket, handleNewUserJoined, handleIncomingCall]);
 
