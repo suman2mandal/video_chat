@@ -1,12 +1,14 @@
 "use client";
 import React, {useEffect} from 'react';
 import {useSocket} from "@/provider/socket";
+import {useRouter} from "next/navigation";
 
 function Page() {
     const socketContext = useSocket();
     const [emailID, setEmailID] = React.useState("");
     const [roomID, setRoomID] = React.useState("");
 
+    const router = useRouter();
     const joinRoom = () => {
         if (socketContext) {
             const {socket} = socketContext;
@@ -14,15 +16,17 @@ function Page() {
         }
     }
 
-    useEffect(() => {
-        if (socketContext) {
-            const {socket} = socketContext;
+    if(socketContext) {
+        const {socket} = socketContext;
+        useEffect(() => {
+
             const handleRoomJoin = ({roomID}:{roomID:string}) => {
                 console.log("Room Joined", roomID);
+                router.push(`/Room/${roomID}`);
             }
             socket.on("joined-room", handleRoomJoin);
-        }
-    }, [socketContext]);
+        }, [socket]);
+    }
 
     return (
         <div className="flex justify-center items-center h-screen">
