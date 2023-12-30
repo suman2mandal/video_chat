@@ -1,39 +1,61 @@
 "use client";
-import React, {useEffect} from 'react';
-import {useSocket} from "@/provider/socket";
-import {useRouter} from "next/navigation";
+import React, { useState, useCallback, useEffect } from 'react';
+import { useSocket } from "@/provider/socket";
+import { useRouter } from "next/navigation";
 
 function Page() {
     const socketContext = useSocket();
-    const [emailID, setEmailID] = React.useState("");
-    const [roomID, setRoomID] = React.useState("");
+    const [emailID, setEmailID] = useState("");
+    const [roomID, setRoomID] = useState("");
+    const { socket } = socketContext || {};
 
     const router = useRouter();
+
     const joinRoom = () => {
-        if (socketContext) {
-            const {socket} = socketContext;
-            socket.emit("join-room", {roomID, userID: emailID});
+        if (socket) {
+            socket.emit("join-room", { roomID, userID: emailID });
         }
-    }
+    };
 
-    if(socketContext) {
-        const {socket} = socketContext;
-        useEffect(() => {
+    useEffect(() => {
+        const handleRoomJoin = ({ roomID: joinedRoomID }: { roomID: string }) => {
+            console.log("Room Joined", joinedRoomID);
+            router.push(`/Room/${joinedRoomID}`);
+        };
 
-            const handleRoomJoin = ({roomID}:{roomID:string}) => {
-                console.log("Room Joined", roomID);
-                router.push(`/Room/${roomID}`);
-            }
+
+        if (socket) {
             socket.on("joined-room", handleRoomJoin);
-        }, [socket]);
-    }
+        }
+
+        return () => {
+            if (socket) {
+                socket.off("joined-room", handleRoomJoin);
+            }
+        };
+    }, [socket, router, roomID, emailID]);
 
     return (
         <div className="flex justify-center items-center h-screen">
             <div className="flex flex-col space-y-6 text-slate-700">
-                <input type="email" value={emailID} onChange={e=>setEmailID(e.target.value)} placeholder="Email" />
-                <input type="text" value={roomID} onChange={e=>setRoomID(e.target.value)} placeholder="Enter room code" />
-                <input type="button" onClick={joinRoom} value="Enter Room" className="bg-stone-700 text-white rounded-xl p-2"/>
+                <input
+                    type="email"
+                    value={emailID}
+                    onChange={(e) => setEmailID(e.target.value)}
+                    placeholder="Email"
+                />
+                <input
+                    type="text"
+                    value={roomID}
+                    onChange={(e) => setRoomID(e.target.value)}
+                    placeholder="Enter room code"
+                />
+                <button
+                    onClick={joinRoom}
+                    className="bg-stone-700 text-white rounded-xl p-2"
+                >
+                    Enter Room
+                </button>
             </div>
         </div>
     );
