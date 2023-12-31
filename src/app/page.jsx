@@ -17,7 +17,7 @@ function Page() {
   };
 
   useEffect(() => {
-    const handleRoomJoin = ({ roomID: joinedRoomID }: { roomID: string }) => {
+    const handleRoomJoin = ({ roomID: joinedRoomID }) => {
       console.log("Room Joined", joinedRoomID);
       router.push(`/Room/${joinedRoomID}`);
     };
